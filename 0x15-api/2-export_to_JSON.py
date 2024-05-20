@@ -1,30 +1,41 @@
 #!/usr/bin/python3
-""" Python to get data from an API and convert to Json"""
-import csv
+
+"""
+Python script that exports data in the JSON format.
+"""
+
+from requests import get
+from sys import argv
 import json
-import requests
-import sys
 
+if __name__ == "__main__":
+    response = get('https://jsonplaceholder.typicode.com/todos/')
+    data = response.json()
 
-if __name__ == '__main__':
-    USER_ID = sys.argv[1]
-    url_to_user = 'https://jsonplaceholder.typicode.com/users/' + USER_ID
-    res = requests.get(url_to_user)
-    """Documentation"""
-    USERNAME = res.json().get('username')
-    """Documentation"""
-    url_to_task = url_to_user + '/todos'
-    res = requests.get(url_to_task)
-    tasks = res.json()
+    row = []
+    response2 = get('https://jsonplaceholder.typicode.com/users')
+    data2 = response2.json()
 
-    dict_data = {USER_ID: []}
-    for task in tasks:
-        TASK_COMPLETED_STATUS = task.get('completed')
-        TASK_TITLE = task.get('title')
-        dict_data[USER_ID].append({
-                                  "task": TASK_TITLE,
-                                  "completed": TASK_COMPLETED_STATUS,
-                                  "username": USERNAME})
-    """print(dict_data)"""
-    with open('{}.json'.format(USER_ID), 'w') as f:
-        json.dump(dict_data, f)
+    for i in data2:
+        if i['id'] == int(argv[1]):
+            u_name = i['username']
+            id_no = i['id']
+
+    row = []
+
+    for i in data:
+
+        new_dict = {}
+
+        if i['userId'] == int(argv[1]):
+            new_dict['username'] = u_name
+            new_dict['task'] = i['title']
+            new_dict['completed'] = i['completed']
+            row.append(new_dict)
+
+    final_dict = {}
+    final_dict[id_no] = row
+    json_obj = json.dumps(final_dict)
+
+    with open(argv[1] + ".json",  "w") as f:
+        f.write(json_obj)
